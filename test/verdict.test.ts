@@ -69,7 +69,7 @@ describe("streams", () => {
     ]);
     const [stream] = toStreams(v, parseConfig("es"));
     expect(stream.name).toBe("AfterCredits\n⏳ Quédate");
-    expect(stream.description).toBe(
+    expect(stream.title).toBe(
       [
         "🎬 Una escena durante los créditos",
         "🎬 Una escena al final de los créditos",
@@ -83,7 +83,7 @@ describe("streams", () => {
   it("says there is nothing, unless the user hid that card", () => {
     const v = decide([r("aftercredits", false), r("tmdb", true, 0, 1)]);
     const [stream] = toStreams(v, parseConfig("en"));
-    expect(stream.description).toBe("Nothing during or after the credits\nSource: aftercredits.com\n⚠️ TMDB says otherwise");
+    expect(stream.title).toBe("Nothing during or after the credits\nSource: aftercredits.com\n⚠️ TMDB says otherwise");
     expect(toStreams(v, parseConfig("hidenone"))).toEqual([]);
   });
 

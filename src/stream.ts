@@ -5,8 +5,12 @@ import type { Verdict } from "./types.js";
 /** The subset of Stremio's Stream object this addon uses. */
 export type Stream = {
   name: string;
-  /** Stremio 5 reads `description`; older clients read `title`. */
-  description: string;
+  /**
+   * The card text. Only `title`: stremio-core reads it as an alias of
+   * `description`, and a stream carrying both fails to parse ("duplicate
+   * field"), which makes Stremio drop the whole response. Older clients read
+   * `title` directly.
+   */
   title: string;
   externalUrl: string;
 };
@@ -37,12 +41,10 @@ export function toStreams(verdict: Verdict, config: Config): Stream[] {
   lines.push(source);
   if (verdict.disagree.length) lines.push(t.disagree(verdict.disagree.map((s) => SOURCE_NAMES[s])));
 
-  const text = lines.join("\n");
   return [
     {
       name: verdict.status === "extras" ? t.nameExtras : t.nameNone,
-      description: text,
-      title: text,
+      title: lines.join("\n"),
       externalUrl: verdict.primary.link,
     },
   ];

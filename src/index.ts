@@ -36,7 +36,9 @@ async function streams(c: Context<{ Bindings: Bindings }>, configSegment?: strin
   try {
     const found = await lookup(id, c.env, (p) => c.executionCtx.waitUntil(p));
     const result = found ? toStreams(found.verdict, parseConfig(configSegment)) : [];
-    c.header("Cache-Control", `public, max-age=${STREAM_CACHE.cacheMaxAge}`);
+    // Short on the HTTP side so a fix reaches clients within the hour;
+    // Stremio's own cache follows cacheMaxAge in the body.
+    c.header("Cache-Control", "public, max-age=3600");
     return c.json({ streams: result, ...STREAM_CACHE });
   } catch (error) {
     console.error(JSON.stringify({ event: "stream-error", id, error: String(error) }));

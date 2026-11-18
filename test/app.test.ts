@@ -66,7 +66,10 @@ describe("addon routes", () => {
     const body = await res.json();
     expect(body.streams).toHaveLength(1);
     expect(body.streams[0].name).toBe("AfterCredits\n⏳ Quédate");
-    expect(body.streams[0].description).toContain("Fuente: aftercredits.com · lo confirman MediaStinger y Wikipedia");
+    expect(body.streams[0].title).toContain("Fuente: aftercredits.com · lo confirman MediaStinger y Wikipedia");
+    // stremio-core reads `title` as an alias of `description`; a stream with
+    // both is a "duplicate field" error and Stremio drops the whole response.
+    expect(Object.keys(body.streams[0]).sort()).toEqual(["externalUrl", "name", "title"]);
     expect(body.cacheMaxAge).toBeGreaterThan(0);
 
     await Promise.all(pending);
