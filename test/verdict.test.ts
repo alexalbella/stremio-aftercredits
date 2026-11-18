@@ -61,29 +61,38 @@ describe("config", () => {
 });
 
 describe("streams", () => {
-  it("writes the card in Spanish with source and confirmation", () => {
+  it("writes the card in Spanish: green dot, one line per scene, vote, sources", () => {
     const v = decide([
       { ...r("aftercredits", true, 1, 1), worthIt: { yes: 7, votes: 7 } },
       r("mediastinger", true, 1, 1),
       r("wikipedia", true, 0, 1),
     ]);
     const [stream] = toStreams(v, parseConfig("es"));
-    expect(stream.name).toBe("AfterCredits\n⏳ Quédate");
+    expect(stream.name).toBe("🟢 Quédate · 2 escenas");
     expect(stream.title).toBe(
       [
-        "🎬 Una escena durante los créditos",
-        "🎬 Una escena al final de los créditos",
-        "👍 Merece la pena esperar: 7 de 7 votos",
-        "Fuente: aftercredits.com · lo confirman MediaStinger y Wikipedia",
+        "🎬 A mitad de los créditos",
+        "🎬 Al final del todo",
+        "👍 7 de 7 dicen que merece la pena",
+        "✓ aftercredits • MediaStinger • Wikipedia",
       ].join("\n"),
     );
     expect(stream.externalUrl).toBe("https://aftercredits.example/film");
   });
 
-  it("says there is nothing, unless the user hid that card", () => {
-    const v = decide([r("aftercredits", false), r("tmdb", true, 0, 1)]);
+  it("turns the vote around when most readers say it is not worth it", () => {
+    const v = decide([{ ...r("aftercredits", true, 0, 1), worthIt: { yes: 1, votes: 5 } }]);
     const [stream] = toStreams(v, parseConfig("en"));
-    expect(stream.title).toBe("Nothing during or after the credits\nSource: aftercredits.com\n⚠️ TMDB says otherwise");
+    expect(stream.name).toBe("🟢 Stay · 1 scene");
+    expect(stream.title).toBe("🎬 At the very end\n👎 Only 1 of 5 say it's worth the wait\n✓ aftercredits");
+  });
+
+  it("says you can go, marks a dispute in yellow, and hides the card on request", () => {
+    const v = decide([r("aftercredits", false), r("mediastinger", true, 1, 0), r("wikipedia", true, 0, 1)]);
+    const [stream] = toStreams(v, parseConfig("es"));
+    expect(stream.name).toBe("🟡 Puedes irte");
+    expect(stream.title).toBe("Nada durante ni después de los créditos\n✓ aftercredits   ✗ MediaStinger • Wikipedia");
+    expect(toStreams(decide([r("aftercredits", false)]), parseConfig("en"))[0].name).toBe("⚪ You can go");
     expect(toStreams(v, parseConfig("hidenone"))).toEqual([]);
   });
 

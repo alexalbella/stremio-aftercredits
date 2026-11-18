@@ -29,16 +29,24 @@ It is free and needs no account or API key.
 
 ## What you see
 
-Open any film. The addon adds one entry to the stream list:
+Open any film and the addon adds one entry to the stream list, in the same style as the Ratings addon: a coloured dot, the verdict, then one short line per fact.
 
-| The film has | The card says |
+```
+🟢 Stay · 2 scenes                       ⚪ You can go
+🎬 Midway through the credits            Nothing during or after the credits
+🎬 At the very end                       ✓ aftercredits • MediaStinger
+👍 7 of 7 say it's worth the wait
+✓ aftercredits • MediaStinger • Wikipedia
+```
+
+| Dot | Meaning |
 |---|---|
-| Scenes during or after the credits | **⏳ Stay**, how many scenes and when, and the readers' vote on whether the wait is worth it |
-| Nothing | **✓ No extras** (you can hide this card in the settings) |
-| Sources that disagree | The answer of the most trusted source, plus a line such as *⚠️ MediaStinger says otherwise* |
-| No entry anywhere | No card |
+| 🟢 | Stay: there is a scene during or after the credits |
+| ⚪ | You can go: the sources say there is nothing |
+| 🟡 | The verdict is disputed: the sources after ✗ say the opposite |
+| (no card) | No source has an entry for the film |
 
-Every card names its source and the sources that agree with it, and selecting it opens the source page. The card never describes the scenes themselves.
+The last line lists the sources that back the verdict (✓) and any that contradict it (✗). Selecting the card opens the page of the first one. The card never describes the scenes themselves. You can hide the "You can go" card in the settings.
 
 ## How it decides
 
@@ -68,7 +76,7 @@ The first source with a definite answer decides. A film only counts as a match w
 
 Stremio addons carry their settings in the install URL. The configure page builds the URL for you, and Stremio's **Configure** button opens that page again.
 
-| Install URL | Language | "No extras" card |
+| Install URL | Language | "You can go" card |
 |---|---|---|
 | `/manifest.json` | English | shown |
 | `/es/manifest.json` | Spanish | shown |
@@ -80,8 +88,8 @@ Stremio addons carry their settings in the install URL. The configure page build
 **Why is there no card for some films?**
 None of the sources has an entry for that film. This is more common with older films and films made outside Hollywood.
 
-**Why does a card say a source disagrees?**
-The sites do not always agree. For *Barbie*, aftercredits.com lists no extras while MediaStinger and Wikipedia each list a scene, so the card gives the aftercredits.com answer and adds a line saying the other two disagree.
+**Why is a card yellow?**
+The sites do not always agree. For *Barbie*, aftercredits.com lists no extras while MediaStinger and Wikipedia each list a scene, so the card turns 🟡, keeps the aftercredits.com answer and lists the other two after ✗.
 
 **Does it work with series?**
 No. Post-credits scenes are a film habit, and the sources only cover films.

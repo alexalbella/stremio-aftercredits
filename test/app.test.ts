@@ -65,8 +65,8 @@ describe("addon routes", () => {
     const res = await get("/es/stream/movie/tt6263850.json");
     const body = await res.json();
     expect(body.streams).toHaveLength(1);
-    expect(body.streams[0].name).toBe("AfterCredits\n⏳ Quédate");
-    expect(body.streams[0].title).toContain("Fuente: aftercredits.com · lo confirman MediaStinger y Wikipedia");
+    expect(body.streams[0].name).toBe("🟢 Quédate · 2 escenas");
+    expect(body.streams[0].title).toContain("✓ aftercredits • MediaStinger • Wikipedia");
     // stremio-core reads `title` as an alias of `description`; a stream with
     // both is a "duplicate field" error and Stremio drops the whole response.
     expect(Object.keys(body.streams[0]).sort()).toEqual(["externalUrl", "name", "title"]);
@@ -77,7 +77,7 @@ describe("addon routes", () => {
 
     fetchMock.mockClear();
     const again = await (await get("/stream/movie/tt6263850.json")).json();
-    expect(again.streams[0].name).toBe("AfterCredits\n⏳ Stay");
+    expect(again.streams[0].name).toBe("🟢 Stay · 2 scenes");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

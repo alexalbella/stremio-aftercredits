@@ -18,32 +18,42 @@ export type Stream = {
 /** Minimum votes before the "worth the wait" line means anything. */
 const MIN_VOTES = 3;
 
+/**
+ * The card reads like the Ratings addon's: a coloured dot and the verdict in
+ * the name, one short line per fact, sources on one line.
+ *   🟢 stay   ⚪ you can go   🟡 a source says otherwise
+ */
 export function toStreams(verdict: Verdict, config: Config): Stream[] {
   if (verdict.status === "unknown" || !verdict.primary) return [];
   if (verdict.status === "none" && config.hideNone) return [];
 
   const t = STRINGS[config.lang];
+  const disputed = verdict.disagree.length > 0;
   const lines: string[] = [];
+  let name: string;
 
   if (verdict.status === "extras") {
+    name = `${disputed ? "🟡" : "🟢"} ${t.stay(verdict.during + verdict.after)}`;
     if (verdict.during) lines.push(t.during(verdict.during));
     if (verdict.after) lines.push(t.after(verdict.after));
     if (!verdict.during && !verdict.after) lines.push(t.somewhere);
-    if (verdict.worthIt && verdict.worthIt.votes >= MIN_VOTES) {
-      lines.push(t.worthIt(verdict.worthIt.yes, verdict.worthIt.votes));
+    const vote = verdict.worthIt;
+    if (vote && vote.votes >= MIN_VOTES) {
+      lines.push(vote.yes * 2 >= vote.votes ? t.worthIt(vote.yes, vote.votes) : t.notWorthIt(vote.yes, vote.votes));
     }
   } else {
+    name = `${disputed ? "🟡" : "⚪"} ${t.go}`;
     lines.push(t.none);
   }
 
-  let source = t.source(SOURCE_NAMES[verdict.primary.source]);
-  if (verdict.agree.length) source += ` · ${t.confirmedBy(verdict.agree.map((s) => SOURCE_NAMES[s]))}`;
-  lines.push(source);
-  if (verdict.disagree.length) lines.push(t.disagree(verdict.disagree.map((s) => SOURCE_NAMES[s])));
+  const names = (ids: typeof verdict.agree) => ids.map((s) => SOURCE_NAMES[s]).join(" • ");
+  let sources = `✓ ${names([verdict.primary.source, ...verdict.agree])}`;
+  if (disputed) sources += `   ✗ ${names(verdict.disagree)}`;
+  lines.push(sources);
 
   return [
     {
-      name: verdict.status === "extras" ? t.nameExtras : t.nameNone,
+      name,
       title: lines.join("\n"),
       externalUrl: verdict.primary.link,
     },
