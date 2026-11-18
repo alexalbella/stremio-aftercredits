@@ -1,13 +1,19 @@
-import type { Manifest } from "stremio-addon-sdk";
-import { appEnv } from "./appEnv.js";
+import type { Config } from "./config.js";
+import { STRINGS } from "./i18n.js";
 
-export const manifest: Manifest = {
-  id: `${appEnv.isDev ? "dev." : ""}com.almosteffective.aftercredits`,
-  version: "1.0.0",
-  name: `AfterCredits${appEnv.isDev ? " (dev)" : ""}`,
-  description: "Are there mid-credits or after credits scenes?",
-  resources: ["stream"],
-  types: ["movie"],
-  catalogs: [],
-  idPrefixes: ["tt"],
-};
+export const VERSION = "2.0.0";
+
+export function manifest(config: Config, origin: string) {
+  return {
+    id: "com.alexalbella.aftercredits",
+    version: VERSION,
+    name: "AfterCredits",
+    description: STRINGS[config.lang].description,
+    logo: `${origin}/logo.png`,
+    resources: ["stream"],
+    types: ["movie"],
+    idPrefixes: ["tt"],
+    catalogs: [],
+    behaviorHints: { configurable: true, configurationRequired: false },
+  };
+}

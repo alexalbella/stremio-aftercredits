@@ -1,38 +1,30 @@
 {
   "name": "stremio-aftercredits",
+  "version": "2.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc && tsc-alias",
-    "start": "node dist/index.js",
-    "start:tsx": "tsx src/index.ts",
-    "stremio:publish": "tsx src/publishToStremio.ts",
-    "test": "vitest"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "wrangler types && tsc --noEmit",
+    "types": "wrangler types"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.0",
-    "@keyv/redis": "^5.1.5",
-    "@keyv/sqlite": "^4.0.6",
-    "await-to-js": "^3.0.0",
-    "cheerio": "^1.1.2",
-    "dotenv": "^17.2.3",
-    "envalid": "^8.1.0",
-    "hono": "^4.11.7",
-    "keyv": "^5.5.5",
-    "ky": "^1.9.1",
-    "zod": "^4.1.5"
+    "hono": "^4.11.7"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
-    "@types/stremio-addon-sdk": "^1.6.12",
-    "tsc-alias": "^1.8.16",
-    "tsx": "^4.7.1",
-    "typescript": "^5.8.3"
+    "@types/node": "^24.19.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.40.0"
   },
+  "packageManager": "pnpm@10.33.2",
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "sqlite3"
+      "workerd",
+      "sharp"
     ]
   }
 }

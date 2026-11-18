@@ -1,18 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "NodeNext",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023"],
+    "types": [],
     "strict": true,
-    "verbatimModuleSyntax": true,
+    "noEmit": true,
     "skipLibCheck": true,
-    "types": ["node"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "outDir": "./dist",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
   },
-  "exclude": ["node_modules"]
+  "include": ["src", "worker-configuration.d.ts"]
 }

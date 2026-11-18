@@ -32,3 +32,8 @@ lerna-debug.log*
 .DS_Store
 
 dist
+
+# wrangler
+.wrangler/
+.dev.vars
+worker-configuration.d.ts

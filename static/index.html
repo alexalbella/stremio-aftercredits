@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AfterCredits for Stremio</title>
+  <meta name="description" content="A Stremio addon that tells you whether a film has scenes during or after the credits.">
+  <link rel="icon" href="/logo.png">
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --panel: #151517;
+      --line: #2a2a2e;
+      --text: #ecebe6;
+      --muted: #8f8d87;
+      --accent: #e8b34b;
+      --accent-ink: #1a1305;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 48px 16px;
+    }
+    main { width: 100%; max-width: 30rem; }
+    h1 {
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(2.4rem, 8vw, 3.2rem);
+      line-height: 1;
+      margin: 0 0 1rem;
+      letter-spacing: -0.01em;
+    }
+    .lede { color: var(--muted); margin: 0 0 2.5rem; max-width: 26rem; }
+
+    /* A preview of the card as it shows up in Stremio's stream list. */
+    .card {
+      display: grid;
+      grid-template-columns: 7.5rem 1fr;
+      gap: 1rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.9rem;
+    }
+    .card-name { white-space: pre-line; font-weight: 600; line-height: 1.35; }
+    .card-desc { white-space: pre-line; color: #c9c7c0; line-height: 1.45; }
+
+    fieldset { border: 0; padding: 0; margin: 0 0 1.5rem; }
+    legend, .label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; padding: 0; }
+    .segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .segmented label { position: relative; }
+    .segmented input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .segmented span { display: block; padding: 0.55rem 1.1rem; cursor: pointer; }
+    .segmented input:checked + span { background: var(--text); color: var(--bg); }
+    .segmented input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .check { display: flex; gap: 0.6rem; align-items: flex-start; cursor: pointer; }
+    .check input { margin-top: 0.3rem; accent-color: var(--accent); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 2rem 0 1rem; }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 0.95rem;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--muted); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+    .btn.primary:hover { filter: brightness(1.08); }
+    code {
+      display: block;
+      font: 0.8rem/1.4 ui-monospace, "Cascadia Code", Consolas, monospace;
+      color: var(--muted);
+      word-break: break-all;
+      padding: 0.6rem 0;
+    }
+    footer { margin-top: 3rem; font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1.25rem; }
+    footer a { color: inherit; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>AfterCredits</h1>
+    <p class="lede" data-i18n="lede">A Stremio addon that tells you whether to stay for the credits before you press play. It checks aftercredits.com, MediaStinger, Wikipedia and TMDB, and tells you which one said so.</p>
+
+    <div class="card" aria-label="Preview">
+      <div class="card-name" id="preview-name"></div>
+      <div class="card-desc" id="preview-desc"></div>
+    </div>
+
+    <form id="config">
+      <fieldset>
+        <legend data-i18n="language">Language</legend>
+        <div class="segmented">
+          <label><input type="radio" name="lang" value="en" checked><span>English</span></label>
+          <label><input type="radio" name="lang" value="es"><span>Español</span></label>
+        </div>
+      </fieldset>
+      <label class="check">
+        <input type="checkbox" name="hidenone">
+        <span data-i18n="hidenone">Hide the card when a film has nothing after the credits</span>
+      </label>
+    </form>
+
+    <div class="actions">
+      <a class="btn primary" id="install" data-i18n="install">Install in Stremio</a>
+      <a class="btn" id="install-web" target="_blank" rel="noopener" data-i18n="installWeb">Stremio Web</a>
+      <button class="btn" id="copy" type="button" data-i18n="copy">Copy link</button>
+    </div>
+    <code id="manifest-url"></code>
+
+    <footer>
+      <span data-i18n="footer">A fork of megadrive/stremio-aftercredits.</span>
+      <a href="https://github.com/alexalbella/stremio-aftercredits">GitHub</a>
+    </footer>
+  </main>
+
+  <script>
+    const T = {
+      en: {
+        lede: "A Stremio addon that tells you whether to stay for the credits before you press play. It checks aftercredits.com, MediaStinger, Wikipedia and TMDB, and tells you which one said so.",
+        language: "Language",
+        hidenone: "Hide the card when a film has nothing after the credits",
+        install: "Install in Stremio",
+        installWeb: "Stremio Web",
+        copy: "Copy link",
+        copied: "Copied",
+        footer: "A fork of megadrive/stremio-aftercredits.",
+        name: "AfterCredits\n⏳ Stay",
+        desc: "🎬 A scene during the credits\n🎬 A scene after the credits\n👍 Worth the wait: 7 of 7 votes\nSource: aftercredits.com · confirmed by MediaStinger and Wikipedia",
+      },
+      es: {
+        lede: "Un addon de Stremio que te dice si quedarte a los créditos antes de darle al play. Consulta aftercredits.com, MediaStinger, Wikipedia y TMDB, y te dice cuál lo ha dicho.",
+        language: "Idioma",
+        hidenone: "Ocultar la tarjeta cuando no hay nada tras los créditos",
+        install: "Instalar en Stremio",
+        installWeb: "Stremio Web",
+        copy: "Copiar enlace",
+        copied: "Copiado",
+        footer: "Un fork de megadrive/stremio-aftercredits.",
+        name: "AfterCredits\n⏳ Quédate",
+        desc: "🎬 Una escena durante los créditos\n🎬 Una escena al final de los créditos\n👍 Merece la pena esperar: 7 de 7 votos\nFuente: aftercredits.com · lo confirman MediaStinger y Wikipedia",
+      },
+    };
+
+    const form = document.getElementById("config");
+    const $ = (id) => document.getElementById(id);
+
+    // Start from the config already in the URL when Stremio opens {base}/es,hidenone/configure.
+    const segment = location.pathname.split("/").filter(Boolean).find((s) => s !== "configure") || "";
+    const tokens = decodeURIComponent(segment).toLowerCase().split(/[,|+\s]+/);
+    const browserSpanish = (navigator.language || "").toLowerCase().startsWith("es");
+    form.lang.value = tokens.includes("es") ? "es" : tokens.includes("en") ? "en" : browserSpanish ? "es" : "en";
+    form.hidenone.checked = tokens.includes("hidenone");
+
+    function render() {
+      const lang = form.lang.value;
+      const t = T[lang];
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t[el.dataset.i18n]; });
+      $("preview-name").textContent = t.name;
+      $("preview-desc").textContent = t.desc;
+
+      const parts = [];
+      if (lang !== "en") parts.push(lang);
+      if (form.hidenone.checked) parts.push("hidenone");
+      const base = location.origin + (parts.length ? "/" + parts.join(",") : "");
+      const manifest = base + "/manifest.json";
+      $("manifest-url").textContent = manifest;
+      $("install").href = manifest.replace(/^https?:/, "stremio:");
+      $("install-web").href = "https://web.stremio.com/#/addons?addon=" + encodeURIComponent(manifest);
+    }
+
+    form.addEventListener("change", render);
+    $("copy").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText($("manifest-url").textContent);
+        $("copy").textContent = T[form.lang.value].copied;
+        setTimeout(render, 1500);
+      } catch {
+        getSelection().selectAllChildren($("manifest-url"));
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
